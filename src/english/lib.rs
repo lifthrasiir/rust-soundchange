@@ -1,5 +1,5 @@
 /*!
-A reimplementation of Mark Rosenfelder's [pronounciation algorithm][spell] for English.
+A reimplementation of Mark Rosenfelder's [pronunciation algorithm][spell] for English.
 Mostly an example for rust-soundchange, but also serves as an approximate algorithm.
 
 [spell]: http://zompist.com/spell.html
@@ -190,7 +190,7 @@ impl Word {
         Word { s: ps.iter().map(|p| p.to_char()).collect() }
     }
 
-    /// Generates a pronounciation of given English word.
+    /// Generates a pronunciation of given English word.
     pub fn from_english(s: &str) -> Word {
         Word { s: spell_to_sound(s) }
     }
