@@ -3,6 +3,12 @@ name = "soundchange-english"
 version = "0.0.1"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
 
+description = "Reimplementation of Mark Rosenfelder's pronunciation algorithm for English"
+homepage = "https://github.com/lifthrasiir/rust-soundchange"
+repository = "https://github.com/lifthrasiir/rust-soundchange"
+keywords = ["linguistics", "english"]
+license = "MIT"
+
 [lib]
 name = "soundchange-english"
 path = "lib.rs"

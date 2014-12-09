@@ -31,6 +31,9 @@ fn main() {
 }
 ```
 
+Note: You can use `RUST_LOG=4` for tracking any change on the string
+and rules that trigger that change.
+
 Any expression in the left side is considered a "condition" for searching,
 and can be either `char`, `&str` or a function from `Option<char>` to `bool`.
 The function argument is an `Option` since it can look at the string boundary.

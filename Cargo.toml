@@ -2,3 +2,11 @@
 name = "soundchange"
 version = "0.0.1"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
+
+description = "Tool for implementing sound change algorithms in Rust"
+homepage = "https://github.com/lifthrasiir/rust-soundchange"
+repository = "https://github.com/lifthrasiir/rust-soundchange"
+keywords = ["linguistics"]
+readme = "README.md"
+license = "MIT"
+
