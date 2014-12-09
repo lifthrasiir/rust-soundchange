@@ -1,0 +1,12 @@
+[package]
+name = "soundchange-english"
+version = "0.0.1"
+authors = ["Kang Seonghoon <public+rust@mearie.org>"]
+
+[lib]
+name = "soundchange-english"
+path = "lib.rs"
+
+[dependencies.soundchange]
+path = "../.."
+
