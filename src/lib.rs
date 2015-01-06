@@ -68,9 +68,9 @@ use std::str::CharRange;
 use std::string::CowString;
 
 #[derive(Copy)] pub struct CharOf<'a>(pub &'a (Fn(Option<char>) -> bool + 'a));
-#[derive(Copy)] pub struct StrOf<'a>(pub &'a (for<'b> Fn(&'b str) -> Option<&'b str> + 'a));
+#[derive(Copy)] pub struct StrOf<'a>(pub &'a (Fn(&str) -> Option<&str> + 'a));
 #[derive(Copy)] pub struct CharTo<'a>(pub &'a (Fn(char) -> char + 'a));
-#[derive(Copy)] pub struct StrTo<'a>(pub &'a (for<'b> Fn(&'b str, &'b mut String) + 'a));
+#[derive(Copy)] pub struct StrTo<'a>(pub &'a (Fn(&str, &mut String) + 'a));
 
 #[derive(Copy)]
 pub enum Cond<'a> {
@@ -175,12 +175,13 @@ impl<'a> IntoCond<'a> for StrOf<'a> {
 }
 
 pub trait Search {
-    fn search_loop(&mut self, s: &str, preconds: &[Cond], postconds: &[Cond], f: |bool, &str|);
+    fn search_loop<F>(&mut self, s: &str, preconds: &[Cond], postconds: &[Cond], mut f: F)
+            where F: FnMut(bool, &str);
 }
 
 impl<'a> Search for &'a str {
-    fn search_loop(&mut self, s: &str, mut preconds: &[Cond], mut postconds: &[Cond],
-                   f: |bool, &str|) {
+    fn search_loop<F>(&mut self, s: &str, mut preconds: &[Cond], mut postconds: &[Cond], mut f: F)
+            where F: FnMut(bool, &str) {
         // try to coalesce the string match. it makes the search quicker.
         let mut search: CowString = self.into_cow();
         loop {
@@ -239,7 +240,8 @@ impl<'a> Search for &'a str {
 }
 
 impl<'a> Search for CharOf<'a> {
-    fn search_loop(&mut self, s: &str, preconds: &[Cond], postconds: &[Cond], f: |bool, &str|) {
+    fn search_loop<F>(&mut self, s: &str, preconds: &[Cond], postconds: &[Cond], mut f: F)
+            where F: FnMut(bool, &str) {
         let CharOf(ref find) = *self;
         let mut lastmatch = 0;
         for (i, c) in s.char_indices() {

@@ -1,6 +1,6 @@
 [package]
 name = "soundchange"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
 
 description = "Tool for implementing sound change algorithms in Rust"

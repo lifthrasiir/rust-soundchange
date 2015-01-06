@@ -5,7 +5,8 @@ use std::str;
 use english::Word;
 
 // if the "word" contains a hyphen or space, we should split it.
-fn map_words<Sep: str::CharEq + Clone>(mut s: &str, sep: Sep, f: |&str| -> String) -> String {
+fn map_words<Sep, F>(mut s: &str, sep: Sep, mut f: F) -> String
+        where Sep: str::CharEq + Clone, F: FnMut(&str) -> String {
     let mut ret = String::new();
     loop {
         match s.find(sep.clone()) {
