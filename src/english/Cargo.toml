@@ -1,6 +1,6 @@
 [package]
 name = "soundchange-english"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
 
 description = "Reimplementation of Mark Rosenfelder's pronunciation algorithm for English"

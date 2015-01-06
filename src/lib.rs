@@ -13,12 +13,20 @@ Typical usage and the comparison with the original SCA rules:
 #[phase(plugin, link)] extern crate soundchange;
 #[phase(plugin, link)] extern crate log;
 
-fn main() {
-    fn boundary(c: Option<char>) -> bool { c.is_none() }
-    fn vowel(c: Option<char>) -> bool { c.map_or(false, |c| "aeiou".contains_char(c)) }
-    fn reverse(s: &str, out: &mut String) { out.extend(s.chars().rev()); }
+use soundchange::{CharOf, StrTo};
 
-    let s = "fihs".into_string();
+fn main() {
+    // custom conditions
+    let is_boundary = |&: c: Option<char>| c.is_none();
+    let is_vowel = |&: c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
+    let boundary = CharOf(&is_boundary);
+    let vowel = CharOf(&is_vowel);
+
+    // custom transformers
+    let make_reverse = |&: s: &str, out: &mut String| out.extend(s.chars().rev());
+    let reverse = StrTo(&make_reverse);
+
+    let s = "fihs".to_string();
     let s = subst_rules! { s.as_slice() with    // V=aeiou
         "f" [boundary] => "gh";                 // f/gh/_#
         "f" => "ph";                            // f/ph/_
@@ -51,17 +59,25 @@ which is for convenience wrapped into the `subst_rules!` macro.
 The syntax should be self-explanatory, except that it returns a `CowString`.
 */
 
-#![feature(macro_rules, phase)]
+#![feature(macro_rules, phase, unboxed_closures)]
 
 #[phase(plugin, link)] extern crate log;
 
-use std::str::{CowString, CharRange};
+use std::borrow::IntoCow;
+use std::str::CharRange;
+use std::string::CowString;
 
+#[derive(Copy)] pub struct CharOf<'a>(pub &'a (Fn(Option<char>) -> bool + 'a));
+#[derive(Copy)] pub struct StrOf<'a>(pub &'a (for<'b> Fn(&'b str) -> Option<&'b str> + 'a));
+#[derive(Copy)] pub struct CharTo<'a>(pub &'a (Fn(char) -> char + 'a));
+#[derive(Copy)] pub struct StrTo<'a>(pub &'a (for<'b> Fn(&'b str, &'b mut String) + 'a));
+
+#[derive(Copy)]
 pub enum Cond<'a> {
     Char(char),
-    CharOf(fn(Option<char>) -> bool),
+    CharOf(CharOf<'a>),
     Str(&'a str),
-    StrOf(for<'b> fn(&'b str) -> Option<&'b str>),
+    StrOf(StrOf<'a>),
 }
 
 impl<'a> Cond<'a> {
@@ -72,17 +88,17 @@ impl<'a> Cond<'a> {
                 let CharRange { ch, next } = s.char_range_at_reverse(s.len());
                 if ch == p {Some(s.slice_to(next))} else {None}
             },
-            Cond::CharOf(ref f) => {
+            Cond::CharOf(CharOf(ref f)) => {
                 let (ch, next) = if s.is_empty() {
                     (None, 0)
                 } else {
                     let CharRange { ch, next } = s.char_range_at_reverse(s.len());
                     (Some(ch), next)
                 };
-                if (*f)(ch) {Some(s.slice_to(next))} else {None}
+                if f(ch) {Some(s.slice_to(next))} else {None}
             },
             Cond::Str(p) => if s.ends_with(p) {Some(s.slice_to(s.len() - p.len()))} else {None},
-            Cond::StrOf(ref f) => (*f)(s),
+            Cond::StrOf(StrOf(ref f)) => f(s),
         }
     }
 
@@ -93,17 +109,17 @@ impl<'a> Cond<'a> {
                 let CharRange { ch, next } = s.char_range_at(0);
                 if ch == p {Some(s.slice_from(next))} else {None}
             },
-            Cond::CharOf(ref f) => {
+            Cond::CharOf(CharOf(ref f)) => {
                 let (ch, next) = if s.is_empty() {
                     (None, 0)
                 } else {
                     let CharRange { ch, next } = s.char_range_at(0);
                     (Some(ch), next)
                 };
-                if (*f)(ch) {Some(s.slice_from(next))} else {None}
+                if f(ch) {Some(s.slice_from(next))} else {None}
             },
             Cond::Str(p) => if s.starts_with(p) {Some(s.slice_from(p.len()))} else {None},
-            Cond::StrOf(ref f) => (*f)(s),
+            Cond::StrOf(StrOf(ref f)) => f(s),
         }
     }
 }
@@ -143,7 +159,7 @@ impl<'a> IntoCond<'a> for char {
     fn into_post_cond(self) -> Cond<'a> { Cond::Char(self) }
 }
 
-impl<'a> IntoCond<'a> for fn(Option<char>) -> bool {
+impl<'a> IntoCond<'a> for CharOf<'a> {
     fn into_pre_cond(self) -> Cond<'a> { Cond::CharOf(self) }
     fn into_post_cond(self) -> Cond<'a> { Cond::CharOf(self) }
 }
@@ -153,7 +169,7 @@ impl<'a> IntoCond<'a> for &'a str {
     fn into_post_cond(self) -> Cond<'a> { Cond::Str(self) }
 }
 
-impl<'a> IntoCond<'a> for fn(&str) -> Option<&str> {
+impl<'a> IntoCond<'a> for StrOf<'a> {
     fn into_pre_cond(self) -> Cond<'a> { Cond::StrOf(self) }
     fn into_post_cond(self) -> Cond<'a> { Cond::StrOf(self) }
 }
@@ -176,7 +192,7 @@ impl<'a> Search for &'a str {
                     *search.to_mut() = t;
                 }
                 Some(&Cond::Str(p)) => {
-                    *search.to_mut() = p.into_string() + search.as_slice();
+                    *search.to_mut() = p.to_string() + search.as_slice();
                 }
                 _ => break,
             }
@@ -185,7 +201,7 @@ impl<'a> Search for &'a str {
         let preoffset = search.len() - self.len();
         let postoffset = search.len();
         loop {
-            match postconds.head() {
+            match postconds.first() {
                 Some(&Cond::Char(p)) => { search.to_mut().push(p); }
                 Some(&Cond::Str(p)) => { search.to_mut().push_str(p); }
                 _ => break,
@@ -222,13 +238,14 @@ impl<'a> Search for &'a str {
     }
 }
 
-impl<'a> Search for |Option<char>|: 'a -> bool {
+impl<'a> Search for CharOf<'a> {
     fn search_loop(&mut self, s: &str, preconds: &[Cond], postconds: &[Cond], f: |bool, &str|) {
+        let CharOf(ref find) = *self;
         let mut lastmatch = 0;
         for (i, c) in s.char_indices() {
             let j = i + c.len_utf8();
-            if (*self)(Some(c)) && check_prefix(preconds, s.slice_to(i))
-                                && check_postfix(postconds, s.slice_from(j)) {
+            if find(Some(c)) && check_prefix(preconds, s.slice_to(i))
+                             && check_postfix(postconds, s.slice_from(j)) {
                 if lastmatch < i {
                     f(false, s.slice(lastmatch, i));
                 }
@@ -242,40 +259,47 @@ impl<'a> Search for |Option<char>|: 'a -> bool {
     }
 }
 
-impl Search for fn(Option<char>) -> bool {
-    fn search_loop(&mut self, s: &str, preconds: &[Cond], postconds: &[Cond], f: |bool, &str|) {
-        (|c| (*self)(c)).search_loop(s, preconds, postconds, f)
+#[derive(Copy)]
+pub enum Transform<'a> {
+    Char(char),
+    CharTo(CharTo<'a>),
+    Str(&'a str),
+    StrTo(StrTo<'a>),
+}
+
+pub trait IntoTransform<'a> {
+    fn into_transform(self) -> Transform<'a>;
+}
+
+impl<'a> IntoTransform<'a> for char {
+    fn into_transform(self) -> Transform<'a> { Transform::Char(self) }
+}
+
+impl<'a> IntoTransform<'a> for CharTo<'a> {
+    fn into_transform(self) -> Transform<'a> { Transform::CharTo(self) }
+}
+
+impl<'a> IntoTransform<'a> for &'a str {
+    fn into_transform(self) -> Transform<'a> { Transform::Str(self) }
+}
+
+impl<'a> IntoTransform<'a> for StrTo<'a> {
+    fn into_transform(self) -> Transform<'a> { Transform::StrTo(self) }
+}
+
+pub fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], mut from: From,
+                               postconds: &[Cond], to: Transform) -> CowString<'a> {
+    fn transform(to: &Transform, s: &str, buf: &mut String) {
+        match *to {
+            Transform::Char(t) => buf.push(t),
+            Transform::CharTo(CharTo(ref f)) => {
+                for c in s.chars() { buf.push(f.call((c,))); }
+            },
+            Transform::Str(t) => buf.push_str(t),
+            Transform::StrTo(StrTo(ref f)) => f.call((s, buf)),
+        }
     }
-}
 
-pub trait Transform {
-    fn transform(&mut self, s: &str, buf: &mut String);
-}
-
-impl<'a> Transform for &'a str {
-    fn transform(&mut self, _s: &str, buf: &mut String) { buf.push_str(*self); }
-}
-
-impl<'a> Transform for |char|: 'a -> char {
-    fn transform(&mut self, s: &str, buf: &mut String) {
-        for c in s.chars() { buf.push((*self)(c)); }
-    }
-}
-
-impl<'a> Transform for |&str, &mut String|: 'a {
-    fn transform(&mut self, s: &str, buf: &mut String) { (*self)(s, buf); }
-}
-
-impl Transform for fn(char) -> char {
-    fn transform(&mut self, s: &str, buf: &mut String) { (|c| (*self)(c)).transform(s, buf) }
-}
-
-impl Transform for fn(&str, &mut String) {
-    fn transform(&mut self, s: &str, buf: &mut String) { (*self)(s, buf); }
-}
-
-pub fn subst<'a, From: Search, To: Transform>(s: &'a str, preconds: &[Cond], mut from: From,
-                                              postconds: &[Cond], mut to: To) -> CowString<'a> {
     let mut buf = String::new();
     let mut unmatched = Some(0);
     from.search_loop(s, preconds, postconds, |found, ss| {
@@ -290,7 +314,7 @@ pub fn subst<'a, From: Search, To: Transform>(s: &'a str, preconds: &[Cond], mut
         }
         if found {
             assert!(unmatched.is_none());
-            to.transform(ss, &mut buf);
+            transform(&to, ss, &mut buf);
         } else if unmatched.is_none() {
             buf.push_str(ss);
         }
@@ -303,15 +327,14 @@ pub fn subst<'a, From: Search, To: Transform>(s: &'a str, preconds: &[Cond], mut
 }
 
 #[macro_export]
-macro_rules! subst_rules(
+macro_rules! subst_rules {
     ($e:expr with $($t:tt)*) => ({
-        use std::str::CowString;
-        use soundchange::{Search, Transform, Cond, IntoCond};
+        use std::string::CowString;
+        use soundchange::{Search, Transform, IntoTransform, Cond, IntoCond};
 
         #[inline(always)]
-        fn subst<'a, From: Search, To: Transform>(s: &'a str, preconds: &[Cond], from: From,
-                                                  postconds: &[Cond], to: To,
-                                                  rulestring: &str) -> CowString<'a> {
+        fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], from: From, postconds: &[Cond],
+                                   to: Transform, rulestring: &str) -> CowString<'a> {
             let ret = ::soundchange::subst(s, preconds, from, postconds, to);
             if s != ret.as_slice() { debug!("{} --> {} ({})", s, ret, rulestring); }
             ret
@@ -324,73 +347,96 @@ macro_rules! subst_rules(
     ($e:expr With [$($pre:tt)*] $from:tt [$($post:tt)*] => $to:expr; $($t:tt)*) =>
         (subst_rules!(subst($e.as_slice(),
                             &[$($pre.into_pre_cond()),*], $from, &[$($post.into_post_cond()),*],
-                            $to,
+                            $to.into_transform(),
                             concat!("[", stringify!($($pre)*), "] ", stringify!($from),
                                    " [", stringify!($($post)*), "] => ", stringify!($to)))
                       With $($t)*));
     ($e:expr With [$($pre:tt)*] $from:tt => $to:expr; $($t:tt)*) =>
         (subst_rules!(subst($e.as_slice(),
                             &[$($pre.into_pre_cond()),*], $from, &[],
-                            $to,
+                            $to.into_transform(),
                             concat!("[", stringify!($($pre)*), "] ", stringify!($from),
                                    " => ", stringify!($to)))
                       With $($t)*));
     ($e:expr With $from:tt [$($post:tt)*] => $to:expr; $($t:tt)*) =>
         (subst_rules!(subst($e.as_slice(),
                             &[], $from, &[$($post.into_post_cond()),*],
-                            $to,
+                            $to.into_transform(),
                             concat!(stringify!($from), " [", stringify!($($post)*), "] => ",
                                     stringify!($to)))
                       With $($t)*));
     ($e:expr With $from:tt => $to:expr; $($t:tt)*) =>
         (subst_rules!(subst($e.as_slice(),
                             &[], $from, &[],
-                            $to,
+                            $to.into_transform(),
                             concat!(stringify!($from), " => ", stringify!($to)))
                       With $($t)*));
-)
+}
 
 #[test]
 fn test_subst() {
-    assert_eq!(subst("hello", &[], "l", &[], "(ell)").as_slice(), "he(ell)(ell)o");
+    assert_eq!(subst("hello", &[], "l", &[], "(ell)".into_transform()), "he(ell)(ell)o");
 
-    assert_eq!(subst("hello", &["a".into_pre_cond()], "l", &[], "(ell)").as_slice(), "hello");
-    assert_eq!(subst("hello", &["e".into_pre_cond()], "l", &[], "(ell)").as_slice(), "he(ell)lo");
-    assert_eq!(subst("hello", &[], "l", &["a".into_post_cond()], "(ell)").as_slice(), "hello");
-    assert_eq!(subst("hello", &[], "l", &["o".into_post_cond()], "(ell)").as_slice(), "hel(ell)o");
+    assert_eq!(subst("hello", &["a".into_pre_cond()], "l", &[], "(ell)".into_transform()),
+               "hello");
+    assert_eq!(subst("hello", &["e".into_pre_cond()], "l", &[], "(ell)".into_transform()),
+               "he(ell)lo");
+    assert_eq!(subst("hello", &[], "l", &["a".into_post_cond()], "(ell)".into_transform()),
+               "hello");
+    assert_eq!(subst("hello", &[], "l", &["o".into_post_cond()], "(ell)".into_transform()),
+               "hel(ell)o");
 
-    fn vowel(c: Option<char>) -> bool { c.map_or(false, |c| "aeiou".contains_char(c)) }
-    fn nasal(c: Option<char>) -> bool { c.map_or(false, |c| "nm".contains_char(c)) }
-    fn clike(c: Option<char>) -> bool { c.map_or(false, |c| "ckx".contains_char(c)) }
-    fn no_vowel(c: Option<char>) -> bool { !vowel(c) }
-    fn boundary(c: Option<char>) -> bool { c.is_none() }
+    let is_vowel = |&: c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
+    let is_nasal = |&: c: Option<char>| c.map_or(false, |c| "nm".contains_char(c));
+    let is_clike = |&: c: Option<char>| c.map_or(false, |c| "ckx".contains_char(c));
+    let is_not_vowel = |&: c: Option<char>| !is_vowel(c);
+    let is_boundary = |&: c: Option<char>| c.is_none();
+
+    let vowel = CharOf(&is_vowel);
+    let nasal = CharOf(&is_nasal);
+    let clike = CharOf(&is_clike);
+    let no_vowel = CharOf(&is_not_vowel);
+    let boundary = CharOf(&is_boundary);
 
     assert_eq!(subst("francis",
                      &["fr".into_pre_cond(), vowel.into_pre_cond()],
                      nasal,
                      &[clike.into_post_cond(), "is".into_post_cond()],
-                     "(n)").as_slice(),
+                     "(n)".into_transform()),
                "fra(n)cis");
     assert_eq!(subst("humankind",
                      &[],
                      "man",
                      &["kind".into_post_cond(), boundary.into_post_cond()],
-                     "woman").as_slice(),
+                     "woman".into_transform()),
                "huwomankind");
 
-    assert_eq!(subst("alter", &[no_vowel.into_pre_cond()], "l", &[], "f").as_slice(), "alter");
-    assert_eq!(subst("will", &[no_vowel.into_pre_cond()], "l", &[], "f").as_slice(), "wilf");
-    assert_eq!(subst("list", &[no_vowel.into_pre_cond()], "l", &[], "f").as_slice(), "fist");
+    assert_eq!(subst("alter",
+                     &[no_vowel.into_pre_cond()], "l", &[],
+                     "f".into_transform()),
+               "alter");
+    assert_eq!(subst("will",
+                     &[no_vowel.into_pre_cond()], "l", &[],
+                     "f".into_transform()),
+               "wilf");
+    assert_eq!(subst("list",
+                     &[no_vowel.into_pre_cond()], "l", &[],
+                     "f".into_transform()),
+               "fist");
 
     assert_eq!(subst("pufffffff",
-                     &["f".into_pre_cond()], "f", &["f".into_post_cond()], "ph").as_slice(),
+                     &["f".into_pre_cond()], "f", &["f".into_post_cond()],
+                     "ph".into_transform()),
                "pufphphphphphf");
 
-    assert!(subst("hello", &[], "l", &[], "(ell)").is_owned());
-    assert!(subst("bovine", &[], "l", &[], "(ell)").is_borrowed());
+    assert!(subst("hello", &[], "l", &[], "(ell)".into_transform()).is_owned());
+    assert!(subst("bovine", &[], "l", &[], "(ell)".into_transform()).is_borrowed());
 
-    assert_eq!(subst("syzygy", &[], "", &[], "/").as_slice(), "/s/y/z/y/g/y/");
-    assert_eq!(subst("syzygy", &[boundary.into_pre_cond()], "", &[], "/").as_slice(), "/syzygy");
-    assert_eq!(subst("syzygy", &[], "", &[boundary.into_pre_cond()], "/").as_slice(), "syzygy/");
+    assert_eq!(subst("syzygy", &[], "", &[], "/".into_transform()),
+               "/s/y/z/y/g/y/");
+    assert_eq!(subst("syzygy", &[boundary.into_pre_cond()], "", &[], "/".into_transform()),
+               "/syzygy");
+    assert_eq!(subst("syzygy", &[], "", &[boundary.into_pre_cond()], "/".into_transform()),
+               "syzygy/");
 }
 

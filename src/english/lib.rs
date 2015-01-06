@@ -5,7 +5,7 @@ Mostly an example for rust-soundchange, but also serves as an approximate algori
 [spell]: http://zompist.com/spell.html
 */
 
-#![feature(phase)]
+#![feature(phase, associated_types)]
 
 #[phase(plugin, link)] extern crate soundchange;
 #[phase(plugin, link)] extern crate log;
@@ -13,6 +13,9 @@ Mostly an example for rust-soundchange, but also serves as an approximate algori
 use std::char;
 use std::str;
 use std::fmt;
+use std::num::FromPrimitive;
+
+use soundchange::{CharOf, CharTo};
 
 /// A phoneme for English.
 ///
@@ -30,7 +33,7 @@ use std::fmt;
 // [1] they are actually not "long", but they have matching "short" vowels.
 //     this is a direct result of the Great Vowel Shift, and they were indeed differentiated
 //     only by the longness before the GVS, hence the name.
-#[deriving(PartialEq, Eq, FromPrimitive)]
+#[derive(PartialEq, Eq, FromPrimitive, Copy)]
 pub enum Phoneme {
     // consonants
     P  = 'p' as int, // [p]    paper PAYP@R
@@ -211,10 +214,11 @@ impl fmt::Show for Word {
 }
 
 /// An iterator for every phoneme inside given word.
-#[deriving(Clone)]
+#[derive(Clone)]
 pub struct WordPhonemes<'a> { base: str::Chars<'a> }
 
-impl<'a> Iterator<Phoneme> for WordPhonemes<'a> {
+impl<'a> Iterator for WordPhonemes<'a> {
+    type Item = Phoneme;
     fn next(&mut self) -> Option<Phoneme> {
         self.base.next().map(|c| Phoneme::from_char(c).unwrap())
     }
@@ -223,7 +227,7 @@ impl<'a> Iterator<Phoneme> for WordPhonemes<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator<Phoneme> for WordPhonemes<'a> {
+impl<'a> DoubleEndedIterator for WordPhonemes<'a> {
     fn next_back(&mut self) -> Option<Phoneme> {
         self.base.next_back().map(|c| Phoneme::from_char(c).unwrap())
     }
@@ -243,14 +247,14 @@ fn spell_to_sound(s: &str) -> String {
     let s = buf.as_slice();
 
     // predicates
-    fn vowel(c: Option<char>) -> bool {
+    let is_vowel = |&: c: Option<char>| {
         c.and_then(Phoneme::from_char).map_or(false, |c| c.is_vowel())
-    }
-    fn consonant(c: Option<char>) -> bool {
+    };
+    let is_consonant = |&: c: Option<char>| {
         c.and_then(Phoneme::from_char).map_or(false, |c| c.is_consonant())
-    }
-    fn no_vowel(c: Option<char>) -> bool { !vowel(c) }
-    fn unknown_vowel(c: Option<char>) -> bool {
+    };
+    let is_not_vowel = |&: c: Option<char>| !is_vowel(c);
+    let is_unknown_vowel = |&: c: Option<char>| {
         match c.and_then(Phoneme::from_char) {
             Some(Phoneme::_A) |
             Some(Phoneme::_E) |
@@ -260,20 +264,30 @@ fn spell_to_sound(s: &str) -> String {
             Some(Phoneme::OO) => true,
             _ => false
         }
-    }
-    fn long_vowel(c: Option<char>) -> bool {
+    };
+    let is_long_vowel = |&: c: Option<char>| {
         c.and_then(Phoneme::from_char).map_or(false, |c| c.is_long_vowel())
-    }
-    fn boundary(c: Option<char>) -> bool { c.is_none() }
-    fn no_boundary(c: Option<char>) -> bool { c.is_some() }
+    };
+    let is_boundary = |&: c: Option<char>| c.is_none();
+    let is_not_boundary = |&: c: Option<char>| c.is_some();
 
     // transformers
-    fn to_short_vowel(c: char) -> char {
+    let make_short_vowel = |&: c: char| {
         Phoneme::from_char(c).map_or(c, |c| c.to_short_vowel().to_char())
-    }
-    fn to_long_vowel(c: char) -> char {
+    };
+    let make_long_vowel = |&: c: char| {
         Phoneme::from_char(c).map_or(c, |c| c.to_long_vowel().to_char())
-    }
+    };
+
+    let vowel = CharOf(&is_vowel);
+    let consonant = CharOf(&is_consonant);
+    let no_vowel = CharOf(&is_not_vowel);
+    let unknown_vowel = CharOf(&is_unknown_vowel);
+    let long_vowel = CharOf(&is_long_vowel);
+    let boundary = CharOf(&is_boundary);
+    let no_boundary = CharOf(&is_not_boundary);
+    let to_short_vowel = CharTo(&make_short_vowel);
+    let to_long_vowel = CharTo(&make_long_vowel);
 
     // we need to split rules to work with the recursion limit
     let s = subst_rules! { s with
