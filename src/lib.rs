@@ -9,9 +9,8 @@ with a necessary tweak for Rust's macro system.
 Typical usage and the comparison with the original SCA rules:
 
 ```
-#![feature(phase)]
-#[phase(plugin, link)] extern crate soundchange;
-#[phase(plugin, link)] extern crate log;
+#[macro_use] extern crate soundchange;
+#[macro_use] extern crate log;
 
 use soundchange::{CharOf, StrTo};
 
@@ -59,9 +58,9 @@ which is for convenience wrapped into the `subst_rules!` macro.
 The syntax should be self-explanatory, except that it returns a `CowString`.
 */
 
-#![feature(macro_rules, phase, unboxed_closures)]
+#![feature(unboxed_closures)]
 
-#[phase(plugin, link)] extern crate log;
+#[macro_use] extern crate log;
 
 use std::borrow::IntoCow;
 use std::str::CharRange;

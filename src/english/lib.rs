@@ -5,10 +5,8 @@ Mostly an example for rust-soundchange, but also serves as an approximate algori
 [spell]: http://zompist.com/spell.html
 */
 
-#![feature(phase, associated_types)]
-
-#[phase(plugin, link)] extern crate soundchange;
-#[phase(plugin, link)] extern crate log;
+#[macro_use] extern crate soundchange;
+#[macro_use] extern crate log;
 
 use std::char;
 use std::str;
