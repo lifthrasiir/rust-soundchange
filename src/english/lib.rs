@@ -5,6 +5,8 @@ Mostly an example for rust-soundchange, but also serves as an approximate algori
 [spell]: http://zompist.com/spell.html
 */
 
+#![feature(core)]
+
 #[macro_use] extern crate soundchange;
 #[macro_use] extern crate log;
 
@@ -31,60 +33,60 @@ use soundchange::{CharOf, CharTo};
 // [1] they are actually not "long", but they have matching "short" vowels.
 //     this is a direct result of the Great Vowel Shift, and they were indeed differentiated
 //     only by the longness before the GVS, hence the name.
-#[derive(PartialEq, Eq, FromPrimitive, Copy)]
+#[derive(PartialEq, Eq, FromPrimitive, Copy, Debug)]
 pub enum Phoneme {
     // consonants
-    P  = 'p' as int, // [p]    paper PAYP@R
-    B  = 'b' as int, // [b]    book BUUK
-    T  = 't' as int, // [t]    take TAYK
-    D  = 'd' as int, // [d]    dead DED
-    G  = 'g' as int, // [g]    get GET
-    K  = 'k' as int, // [k]    talk TAWK
-    M  = 'm' as int, // [m]    moon MOON
-    N  = 'n' as int, // [n]    new NOO
-    NG = 'ñ' as int, // [n`]   sing SING
-    F  = 'f' as int, // [f]    four FOHR
-    V  = 'v' as int, // [v]    vine VAIN
-    TH = '+' as int, // [T]    thin THIN
-//  DH               // [D]    this DHIS (not distinguished from TH in the computer rules)
-    S  = 's' as int, // [s]    so SOH
-    Z  = 'z' as int, // [z]    zoo ZOO
-    SH = '$' as int, // [S]    shake SAYK
-//  ZH               // [Z]    measure MEJEWR (only appears as a part of J in the computer rules)
-    CH = 'ç' as int, // [tS]   chew CHOO
-    J  = 'j' as int, // [dZ]   judge JUJ
-    R  = 'r' as int, // [r]    ran RAN
-    L  = 'l' as int, // [l]    late LAYT
-    H  = 'h' as int, // [h]    hang HAYNG
-    Y  = 'y' as int, // [j]    you JOO
-    W  = 'w' as int, // [w]    cow KAW
+    P  = 'p' as isize, // [p]    paper PAYP@R
+    B  = 'b' as isize, // [b]    book BUUK
+    T  = 't' as isize, // [t]    take TAYK
+    D  = 'd' as isize, // [d]    dead DED
+    G  = 'g' as isize, // [g]    get GET
+    K  = 'k' as isize, // [k]    talk TAWK
+    M  = 'm' as isize, // [m]    moon MOON
+    N  = 'n' as isize, // [n]    new NOO
+    NG = 'ñ' as isize, // [n`]   sing SING
+    F  = 'f' as isize, // [f]    four FOHR
+    V  = 'v' as isize, // [v]    vine VAIN
+    TH = '+' as isize, // [T]    thin THIN
+//  DH                 // [D]    this DHIS (not distinguished from TH in the computer rules)
+    S  = 's' as isize, // [s]    so SOH
+    Z  = 'z' as isize, // [z]    zoo ZOO
+    SH = '$' as isize, // [S]    shake SAYK
+//  ZH                 // [Z]    measure MEJEWR (only appears as a part of J in the computer rules)
+    CH = 'ç' as isize, // [tS]   chew CHOO
+    J  = 'j' as isize, // [dZ]   judge JUJ
+    R  = 'r' as isize, // [r]    ran RAN
+    L  = 'l' as isize, // [l]    late LAYT
+    H  = 'h' as isize, // [h]    hang HAYNG
+    Y  = 'y' as isize, // [j]    you JOO
+    W  = 'w' as isize, // [w]    cow KAW
 
     // untranslated consonants (should not appear in the final result)
-    _C = 'c' as int,
-    _Q = 'q' as int,
-    _X = 'x' as int,
+    _C = 'c' as isize,
+    _Q = 'q' as isize,
+    _X = 'x' as isize,
 
     // vowels
-    AY = 'ä' as int, // [e(I)] rate RAYT
-    A  = 'â' as int, // [{]    rat RAT
-    EE = 'ë' as int, // [i:]   meet MEET
-    E  = 'ê' as int, // [E]    met MET
-    AI = 'ï' as int, // [aI]   bite BAIT
-    I  = 'î' as int, // [I]    bit BIT
-    OH = 'ö' as int, // [oU]   note NOHT
-    O  = 'ô' as int, // [A]    not NOT
-    EW = 'ü' as int, // [ju:]  cute KEWT
-    U  = 'û' as int, // [V]    cut KUT
-    OO = 'u' as int, // [u:]   coot KOOT
-    AW = 'ù' as int, // [O:]   dog DAWG
-    UU = 'ò' as int, // [U]    cook KUUK
-    UH = '@' as int, // [@]    above UHBOV
+    AY = 'ä' as isize, // [e(I)] rate RAYT
+    A  = 'â' as isize, // [{]    rat RAT
+    EE = 'ë' as isize, // [i:]   meet MEET
+    E  = 'ê' as isize, // [E]    met MET
+    AI = 'ï' as isize, // [aI]   bite BAIT
+    I  = 'î' as isize, // [I]    bit BIT
+    OH = 'ö' as isize, // [oU]   note NOHT
+    O  = 'ô' as isize, // [A]    not NOT
+    EW = 'ü' as isize, // [ju:]  cute KEWT
+    U  = 'û' as isize, // [V]    cut KUT
+    OO = 'u' as isize, // [u:]   coot KOOT
+    AW = 'ù' as isize, // [O:]   dog DAWG
+    UU = 'ò' as isize, // [U]    cook KUUK
+    UH = '@' as isize, // [@]    above UHBOV
 
     // untranslated vowels (should not appear in the final result)
-    _A = 'a' as int,
-    _E = 'e' as int,
-    _I = 'i' as int,
-    _O = 'o' as int,
+    _A = 'a' as isize,
+    _E = 'e' as isize,
+    _I = 'i' as isize,
+    _O = 'o' as isize,
 }
 
 impl Phoneme {
@@ -178,8 +180,10 @@ impl Phoneme {
     }
 }
 
-impl fmt::Show for Phoneme {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { self.to_char().fmt(f) }
+impl fmt::Display for Phoneme {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.to_char(), f)
+    }
 }
 
 /// A sequence of phonemes.
@@ -203,12 +207,16 @@ impl Word {
 
     /// Returns a string notation of phonemes.
     pub fn as_str<'a>(&'a self) -> &'a str {
-        self.s.as_slice()
+        &self.s
     }
 }
 
-impl fmt::Show for Word {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { self.s.fmt(f) }
+impl fmt::Display for Word {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Display::fmt(&self.s, f) }
+}
+
+impl fmt::Debug for Word {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { fmt::Debug::fmt(&self.s, f) }
 }
 
 /// An iterator for every phoneme inside given word.
@@ -220,7 +228,7 @@ impl<'a> Iterator for WordPhonemes<'a> {
     fn next(&mut self) -> Option<Phoneme> {
         self.base.next().map(|c| Phoneme::from_char(c).unwrap())
     }
-    fn size_hint(&self) -> (uint, Option<uint>) {
+    fn size_hint(&self) -> (usize, Option<usize>) {
         self.base.size_hint()
     }
 }
@@ -242,17 +250,17 @@ fn spell_to_sound(s: &str) -> String {
         }
     }
     let buf: String = s.chars().filter_map(to_ascii_lower_or_none).collect();
-    let s = buf.as_slice();
+    let s = &buf;
 
     // predicates
-    let is_vowel = |&: c: Option<char>| {
+    let is_vowel = |c: Option<char>| {
         c.and_then(Phoneme::from_char).map_or(false, |c| c.is_vowel())
     };
-    let is_consonant = |&: c: Option<char>| {
+    let is_consonant = |c: Option<char>| {
         c.and_then(Phoneme::from_char).map_or(false, |c| c.is_consonant())
     };
-    let is_not_vowel = |&: c: Option<char>| !is_vowel(c);
-    let is_unknown_vowel = |&: c: Option<char>| {
+    let is_not_vowel = |c: Option<char>| !is_vowel(c);
+    let is_unknown_vowel = |c: Option<char>| {
         match c.and_then(Phoneme::from_char) {
             Some(Phoneme::_A) |
             Some(Phoneme::_E) |
@@ -263,17 +271,17 @@ fn spell_to_sound(s: &str) -> String {
             _ => false
         }
     };
-    let is_long_vowel = |&: c: Option<char>| {
+    let is_long_vowel = |c: Option<char>| {
         c.and_then(Phoneme::from_char).map_or(false, |c| c.is_long_vowel())
     };
-    let is_boundary = |&: c: Option<char>| c.is_none();
-    let is_not_boundary = |&: c: Option<char>| c.is_some();
+    let is_boundary = |c: Option<char>| c.is_none();
+    let is_not_boundary = |c: Option<char>| c.is_some();
 
     // transformers
-    let make_short_vowel = |&: c: char| {
+    let make_short_vowel = |c: char| {
         Phoneme::from_char(c).map_or(c, |c| c.to_short_vowel().to_char())
     };
-    let make_long_vowel = |&: c: char| {
+    let make_long_vowel = |c: char| {
         Phoneme::from_char(c).map_or(c, |c| c.to_long_vowel().to_char())
     };
 
@@ -288,7 +296,7 @@ fn spell_to_sound(s: &str) -> String {
     let to_long_vowel = CharTo(&make_long_vowel);
 
     // we need to split rules to work with the recursion limit
-    let s = subst_rules! { s with
+    let s = subst_rules! { s =>
         // digraphs
         "ch" => "ç";
         "sh" => "$";
@@ -332,7 +340,10 @@ fn spell_to_sound(s: &str) -> String {
         [consonant] "y" [no_vowel] => "i";
         [consonant] "y" ["e" boundary] => "i";
         [no_vowel consonant] "ie" [boundary] => "ï";
+    };
 
+    // XXX I don't know why but this split is required for rustdoc but not for rustc.
+    let s = subst_rules! { s =>
         // sSl simplification
         ["s"] "t" ["l" vowel boundary] => "";
 
@@ -357,7 +368,7 @@ fn spell_to_sound(s: &str) -> String {
         ["u"] "s" [vowel] => "z";
     };
 
-    let s = subst_rules! { s.as_slice() with
+    let s = subst_rules! { s =>
         // al to ol
         "a" ["ls"] => "ò";
         "a" ["lr"] => "ò";
@@ -397,7 +408,7 @@ fn spell_to_sound(s: &str) -> String {
         [consonant] "le" [boundary] => "@l";
     };
 
-    let s = subst_rules! { s.as_slice() with
+    let s = subst_rules! { s =>
         // vowels are long medially and short before 2 consonants or a final one
         [no_vowel] unknown_vowel [consonant vowel] => to_long_vowel;
         [no_vowel] unknown_vowel [consonant no_vowel] => to_short_vowel;
@@ -434,7 +445,7 @@ fn spell_to_sound(s: &str) -> String {
         [vowel consonant consonant consonant] "e" [boundary] => "";
     };
 
-    let s = subst_rules! { s.as_slice() with
+    let s = subst_rules! { s =>
         // common affixes
         [no_boundary no_boundary no_boundary] "ë" ["mênt" boundary] => "";
         [no_boundary no_boundary no_boundary] "ë" ["nêss" boundary] => "";
@@ -478,7 +489,7 @@ fn spell_to_sound(s: &str) -> String {
         "ôw" [boundary] => "ö";
     };
 
-    let s = subst_rules! { s.as_slice() with
+    let s = subst_rules! { s =>
         // pesky final syllables
         // XXX the original `english.tc` is incorrect: `V/@/VC(V)_l#` should be `U/@/VC(V)_l#`
         [vowel consonant] unknown_vowel ["l" boundary] => "@";
@@ -527,7 +538,7 @@ fn spell_to_sound(s: &str) -> String {
         "ù" ["r"] => "@";
     };
 
-    let s = subst_rules! { s.as_slice() with
+    let s = subst_rules! { s =>
         // handle ng
         "ng" ["p"] => "ñ";
         "ng" ["t"] => "ñ";
@@ -576,12 +587,12 @@ fn spell_to_sound(s: &str) -> String {
 
 #[test]
 fn test_spell_to_sound() {
-    assert_eq!(spell_to_sound("coffee").as_slice(), "kòfë");
-    assert_eq!(spell_to_sound("market").as_slice(), "môrkêt");
-    assert_eq!(spell_to_sound("ugly").as_slice(), "ûglë");
-    assert_eq!(spell_to_sound("high").as_slice(), "hï");
-    assert_eq!(spell_to_sound("canal").as_slice(), "känâl");
-    assert_eq!(spell_to_sound("although").as_slice(), "òl+ö");
-    assert_eq!(spell_to_sound("assure").as_slice(), "â$ür");
-    assert_eq!(spell_to_sound("fish").as_slice(), "fî$");
+    assert_eq!(spell_to_sound("coffee"), "kòfë");
+    assert_eq!(spell_to_sound("market"), "môrkêt");
+    assert_eq!(spell_to_sound("ugly"), "ûglë");
+    assert_eq!(spell_to_sound("high"), "hï");
+    assert_eq!(spell_to_sound("canal"), "känâl");
+    assert_eq!(spell_to_sound("although"), "òl+ö");
+    assert_eq!(spell_to_sound("assure"), "â$ür");
+    assert_eq!(spell_to_sound("fish"), "fî$");
 }

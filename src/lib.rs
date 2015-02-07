@@ -16,17 +16,17 @@ use soundchange::{CharOf, StrTo};
 
 fn main() {
     // custom conditions
-    let is_boundary = |&: c: Option<char>| c.is_none();
-    let is_vowel = |&: c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
+    let is_boundary = |c: Option<char>| c.is_none();
+    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
     let boundary = CharOf(&is_boundary);
     let vowel = CharOf(&is_vowel);
 
     // custom transformers
-    let make_reverse = |&: s: &str, out: &mut String| out.extend(s.chars().rev());
+    let make_reverse = |s: &str, out: &mut String| out.extend(s.chars().rev());
     let reverse = StrTo(&make_reverse);
 
     let s = "fihs".to_string();
-    let s = subst_rules! { s.as_slice() with    // V=aeiou
+    let s = subst_rules! { s =>                 // V=aeiou
         "f" [boundary] => "gh";                 // f/gh/_#
         "f" => "ph";                            // f/ph/_
         ["w"] vowel ["m" vowel "n"] => "o";     // V/o/w_mVn
@@ -34,12 +34,13 @@ fn main() {
         [vowel] "hs" => reverse;                // sh/\\/V_
         "" [boundary] => "ing";                 // /ing/_#
     };
-    assert_eq!(s.as_slice(), "phishing");
+    assert_eq!(s, "phishing");
 }
 ```
 
 Note: You can use `RUST_LOG=4` for tracking any change on the string
-and rules that trigger that change.
+and rules that trigger that change. Also, a large number of rules may trigger
+a recursion limit on rustc; you have to split them in that case.
 
 Any expression in the left side is considered a "condition" for searching,
 and can be either `char`, `&str` or a function from `Option<char>` to `bool`.
@@ -58,9 +59,7 @@ which is for convenience wrapped into the `subst_rules!` macro.
 The syntax should be self-explanatory, except that it returns a `CowString`.
 */
 
-#![feature(unboxed_closures)]
-
-#[macro_use] extern crate log;
+#![feature(unboxed_closures, core, collections)]
 
 use std::borrow::IntoCow;
 use std::str::CharRange;
@@ -85,7 +84,7 @@ impl<'a> Cond<'a> {
             Cond::Char(p) => {
                 if s.is_empty() { return None; }
                 let CharRange { ch, next } = s.char_range_at_reverse(s.len());
-                if ch == p {Some(s.slice_to(next))} else {None}
+                if ch == p {Some(&s[..next])} else {None}
             },
             Cond::CharOf(CharOf(ref f)) => {
                 let (ch, next) = if s.is_empty() {
@@ -94,9 +93,9 @@ impl<'a> Cond<'a> {
                     let CharRange { ch, next } = s.char_range_at_reverse(s.len());
                     (Some(ch), next)
                 };
-                if f(ch) {Some(s.slice_to(next))} else {None}
+                if f(ch) {Some(&s[..next])} else {None}
             },
-            Cond::Str(p) => if s.ends_with(p) {Some(s.slice_to(s.len() - p.len()))} else {None},
+            Cond::Str(p) => if s.ends_with(p) {Some(&s[..s.len() - p.len()])} else {None},
             Cond::StrOf(StrOf(ref f)) => f(s),
         }
     }
@@ -106,7 +105,7 @@ impl<'a> Cond<'a> {
             Cond::Char(p) => {
                 if s.is_empty() { return None; }
                 let CharRange { ch, next } = s.char_range_at(0);
-                if ch == p {Some(s.slice_from(next))} else {None}
+                if ch == p {Some(&s[next..])} else {None}
             },
             Cond::CharOf(CharOf(ref f)) => {
                 let (ch, next) = if s.is_empty() {
@@ -115,9 +114,9 @@ impl<'a> Cond<'a> {
                     let CharRange { ch, next } = s.char_range_at(0);
                     (Some(ch), next)
                 };
-                if f(ch) {Some(s.slice_from(next))} else {None}
+                if f(ch) {Some(&s[next..])} else {None}
             },
-            Cond::Str(p) => if s.starts_with(p) {Some(s.slice_from(p.len()))} else {None},
+            Cond::Str(p) => if s.starts_with(p) {Some(&s[p.len()..])} else {None},
             Cond::StrOf(StrOf(ref f)) => f(s),
         }
     }
@@ -188,11 +187,11 @@ impl<'a> Search for &'a str {
                 Some(&Cond::Char(p)) => {
                     let mut t = String::new();
                     t.push(p);
-                    t.push_str(search.as_slice());
+                    t.push_str(&search);
                     *search.to_mut() = t;
                 }
                 Some(&Cond::Str(p)) => {
-                    *search.to_mut() = p.to_string() + search.as_slice();
+                    *search.to_mut() = p.to_string() + &search;
                 }
                 _ => break,
             }
@@ -212,19 +211,19 @@ impl<'a> Search for &'a str {
         let mut lastmatch = 0;
         let mut start = 0;
         loop {
-            let pos = match s.slice_from(start).find_str(search.as_slice()) {
+            let pos = match s[start..].find_str(&search) {
                 Some(i) => i + start,
                 None => break,
             };
 
-            if check_prefix(preconds, s.slice_to(pos)) &&
-               check_postfix(postconds, s.slice_from(pos + search.len())) {
+            if check_prefix(preconds, &s[..pos]) &&
+               check_postfix(postconds, &s[pos + search.len()..]) {
                 let matchstart = pos + preoffset;
                 let matchend = pos + postoffset;
                 if lastmatch < matchstart {
-                    f(false, s.slice(lastmatch, matchstart));
+                    f(false, &s[lastmatch..matchstart]);
                 }
-                f(true, s.slice(matchstart, matchend));
+                f(true, &s[matchstart..matchend]);
                 lastmatch = matchend;
             }
 
@@ -233,7 +232,7 @@ impl<'a> Search for &'a str {
         }
 
         if lastmatch < s.len() {
-            f(false, s.slice_from(lastmatch));
+            f(false, &s[lastmatch..]);
         }
     }
 }
@@ -245,17 +244,17 @@ impl<'a> Search for CharOf<'a> {
         let mut lastmatch = 0;
         for (i, c) in s.char_indices() {
             let j = i + c.len_utf8();
-            if find(Some(c)) && check_prefix(preconds, s.slice_to(i))
-                             && check_postfix(postconds, s.slice_from(j)) {
+            if find(Some(c)) && check_prefix(preconds, &s[..i])
+                             && check_postfix(postconds, &s[j..]) {
                 if lastmatch < i {
-                    f(false, s.slice(lastmatch, i));
+                    f(false, &s[lastmatch..i]);
                 }
-                f(true, s.slice(i, j));
+                f(true, &s[i..j]);
                 lastmatch = j;
             }
         }
         if lastmatch < s.len() {
-            f(false, s.slice_from(lastmatch));
+            f(false, &s[lastmatch..]);
         }
     }
 }
@@ -309,7 +308,7 @@ pub fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], mut from: From,
             if !found && last == s.subslice_offset(ss) {
                 unmatched = Some(last + ss.len());
             } else {
-                buf.push_str(s.slice_to(last));
+                buf.push_str(&s[..last]);
                 unmatched = None;
             }
         }
@@ -322,56 +321,57 @@ pub fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], mut from: From,
     });
 
     match unmatched {
-        Some(last) => s.slice_to(last).into_cow(),
+        Some(last) => s[..last].into_cow(),
         None => buf.into_cow()
     }
 }
 
 #[macro_export]
 macro_rules! subst_rules {
-    ($e:expr with $($t:tt)*) => ({
-        use std::string::CowString;
-        use soundchange::{Search, Transform, IntoTransform, Cond, IntoCond};
-
-        #[inline(always)]
-        fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], from: From, postconds: &[Cond],
-                                   to: Transform, rulestring: &str) -> CowString<'a> {
-            let ret = ::soundchange::subst(s, preconds, from, postconds, to);
-            if s != ret.as_slice() { debug!("{} --> {} ({})", s, ret, rulestring); }
-            ret
-        }
-
-        subst_rules!($e With $($t)*)
-    });
-
-    ($e:expr With) => ($e.into_owned()); // XXX oops!
-    ($e:expr With [$($pre:tt)*] $from:tt [$($post:tt)*] => $to:expr; $($t:tt)*) =>
-        (subst_rules!(subst($e.as_slice(),
+    ($e:expr => =>) => ($e.into_owned()); // XXX oops!
+    ($e:expr => => [$($pre:tt)*] $from:tt [$($post:tt)*] => $to:expr; $($t:tt)*) =>
+        (subst_rules!(subst(&$e,
                             &[$($pre.into_pre_cond()),*], $from, &[$($post.into_post_cond()),*],
                             $to.into_transform(),
                             concat!("[", stringify!($($pre)*), "] ", stringify!($from),
                                    " [", stringify!($($post)*), "] => ", stringify!($to)))
-                      With $($t)*));
-    ($e:expr With [$($pre:tt)*] $from:tt => $to:expr; $($t:tt)*) =>
-        (subst_rules!(subst($e.as_slice(),
+                      => => $($t)*));
+    ($e:expr => => [$($pre:tt)*] $from:tt => $to:expr; $($t:tt)*) =>
+        (subst_rules!(subst(&$e,
                             &[$($pre.into_pre_cond()),*], $from, &[],
                             $to.into_transform(),
                             concat!("[", stringify!($($pre)*), "] ", stringify!($from),
                                    " => ", stringify!($to)))
-                      With $($t)*));
-    ($e:expr With $from:tt [$($post:tt)*] => $to:expr; $($t:tt)*) =>
-        (subst_rules!(subst($e.as_slice(),
+                      => => $($t)*));
+    ($e:expr => => $from:tt [$($post:tt)*] => $to:expr; $($t:tt)*) =>
+        (subst_rules!(subst(&$e,
                             &[], $from, &[$($post.into_post_cond()),*],
                             $to.into_transform(),
                             concat!(stringify!($from), " [", stringify!($($post)*), "] => ",
                                     stringify!($to)))
-                      With $($t)*));
-    ($e:expr With $from:tt => $to:expr; $($t:tt)*) =>
-        (subst_rules!(subst($e.as_slice(),
+                      => => $($t)*));
+    ($e:expr => => $from:tt => $to:expr; $($t:tt)*) =>
+        (subst_rules!(subst(&$e,
                             &[], $from, &[],
                             $to.into_transform(),
                             concat!(stringify!($from), " => ", stringify!($to)))
-                      With $($t)*));
+                      => => $($t)*));
+
+    // has to be come later
+    ($e:expr => $($t:tt)*) => ({
+        use std::string::CowString;
+        use $crate::{Search, Transform, IntoTransform, Cond, IntoCond};
+
+        #[inline(always)]
+        fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], from: From, postconds: &[Cond],
+                                   to: Transform, rulestring: &str) -> CowString<'a> {
+            let ret = $crate::subst(s, preconds, from, postconds, to);
+            if s != ret { debug!("{} --> {} ({})", s, ret, rulestring); }
+            ret
+        }
+
+        subst_rules!($e => => $($t)*)
+    });
 }
 
 #[test]
@@ -387,11 +387,11 @@ fn test_subst() {
     assert_eq!(subst("hello", &[], "l", &["o".into_post_cond()], "(ell)".into_transform()),
                "hel(ell)o");
 
-    let is_vowel = |&: c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
-    let is_nasal = |&: c: Option<char>| c.map_or(false, |c| "nm".contains_char(c));
-    let is_clike = |&: c: Option<char>| c.map_or(false, |c| "ckx".contains_char(c));
-    let is_not_vowel = |&: c: Option<char>| !is_vowel(c);
-    let is_boundary = |&: c: Option<char>| c.is_none();
+    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
+    let is_nasal = |c: Option<char>| c.map_or(false, |c| "nm".contains_char(c));
+    let is_clike = |c: Option<char>| c.map_or(false, |c| "ckx".contains_char(c));
+    let is_not_vowel = |c: Option<char>| !is_vowel(c);
+    let is_boundary = |c: Option<char>| c.is_none();
 
     let vowel = CharOf(&is_vowel);
     let nasal = CharOf(&is_nasal);

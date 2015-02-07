@@ -10,17 +10,24 @@ with a necessary tweak for Rust's macro system.
 Typical usage and the comparison with the original SCA rules:
 
 ```
-#![feature(phase)]
-#[phase(plugin, link)] extern crate soundchange;
-#[phase(plugin, link)] extern crate log;
+#[macro_use] extern crate soundchange;
+#[macro_use] extern crate log;
+
+use soundchange::{CharOf, StrTo};
 
 fn main() {
-    fn boundary(c: Option<char>) -> bool { c.is_none() }
-    fn vowel(c: Option<char>) -> bool { c.map_or(false, |c| "aeiou".contains_char(c)) }
-    fn reverse(s: &str, out: &mut String) { out.extend(s.chars().rev()); }
+    // custom conditions
+    let is_boundary = |c: Option<char>| c.is_none();
+    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
+    let boundary = CharOf(&is_boundary);
+    let vowel = CharOf(&is_vowel);
 
-    let s = "fihs".into_string();
-    let s = subst_rules! { s.as_slice() with    // V=aeiou
+    // custom transformers
+    let make_reverse = |s: &str, out: &mut String| out.extend(s.chars().rev());
+    let reverse = StrTo(&make_reverse);
+
+    let s = "fihs".to_string();
+    let s = subst_rules! { s =>                 // V=aeiou
         "f" [boundary] => "gh";                 // f/gh/_#
         "f" => "ph";                            // f/ph/_
         ["w"] vowel ["m" vowel "n"] => "o";     // V/o/w_mVn
@@ -28,12 +35,13 @@ fn main() {
         [vowel] "hs" => reverse;                // sh/\\/V_
         "" [boundary] => "ing";                 // /ing/_#
     };
-    assert_eq!(s.as_slice(), "phishing");
+    assert_eq!(s, "phishing");
 }
 ```
 
 Note: You can use `RUST_LOG=4` for tracking any change on the string
-and rules that trigger that change.
+and rules that trigger that change. Also, a large number of rules may trigger
+a recursion limit on rustc; you have to split them in that case.
 
 Any expression in the left side is considered a "condition" for searching,
 and can be either `char`, `&str` or a function from `Option<char>` to `bool`.

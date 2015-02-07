@@ -1,6 +1,6 @@
 [package]
 name = "soundchange-english"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
 
 description = "Reimplementation of Mark Rosenfelder's pronunciation algorithm for English"
@@ -12,6 +12,9 @@ license = "MIT"
 [lib]
 name = "soundchange-english"
 path = "lib.rs"
+
+[dependencies]
+log = "0.2.2"
 
 [dependencies.soundchange]
 path = "../.."

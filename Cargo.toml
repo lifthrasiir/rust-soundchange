@@ -1,6 +1,6 @@
 [package]
 name = "soundchange"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
 
 description = "Tool for implementing sound change algorithms in Rust"
@@ -9,4 +9,7 @@ repository = "https://github.com/lifthrasiir/rust-soundchange"
 keywords = ["linguistics"]
 readme = "README.md"
 license = "MIT"
+
+[dev-dependencies]
+log = "0.2.2"
 
