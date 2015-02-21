@@ -1,6 +1,6 @@
 [package]
 name = "soundchange"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Kang Seonghoon <public+rust@mearie.org>"]
 
 description = "Tool for implementing sound change algorithms in Rust"
@@ -11,5 +11,5 @@ readme = "README.md"
 license = "MIT"
 
 [dev-dependencies]
-log = "0.2.2"
+log = "0.2.4"
 

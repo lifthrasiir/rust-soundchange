@@ -1,4 +1,4 @@
-#![feature(core, io, collections)]
+#![feature(core, old_io, collections)]
 
 extern crate "soundchange-english" as english;
 
@@ -40,7 +40,7 @@ fn main() {
         if let Some(sep) = line.find('/') {
             let word = line[..sep].trim_right();
             let actual = line[sep + 1..].trim_left();
-            let expected = map_words(word, &[' ', '-'][], |w| Word::from_english(w).to_string());
+            let expected = map_words(word, &[' ', '-'][..], |w| Word::from_english(w).to_string());
             println!("{} / {} --> {}", word, actual, expected);
         }
     }

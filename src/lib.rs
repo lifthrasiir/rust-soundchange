@@ -56,14 +56,13 @@ When multiple characters have been matched, a function will be invoked for each 
 
 The actual processing is driven through the `subst` function,
 which is for convenience wrapped into the `subst_rules!` macro.
-The syntax should be self-explanatory, except that it returns a `CowString`.
+The syntax should be self-explanatory, except that it returns a `Cow` string.
 */
 
 #![feature(unboxed_closures, core, collections)]
 
-use std::borrow::IntoCow;
+use std::borrow::{Cow, IntoCow};
 use std::str::CharRange;
-use std::string::CowString;
 
 #[derive(Copy)] pub struct CharOf<'a>(pub &'a (Fn(Option<char>) -> bool + 'a));
 #[derive(Copy)] pub struct StrOf<'a>(pub &'a (Fn(&str) -> Option<&str> + 'a));
@@ -181,7 +180,7 @@ impl<'a> Search for &'a str {
     fn search_loop<F>(&mut self, s: &str, mut preconds: &[Cond], mut postconds: &[Cond], mut f: F)
             where F: FnMut(bool, &str) {
         // try to coalesce the string match. it makes the search quicker.
-        let mut search: CowString = self.into_cow();
+        let mut search: Cow<_> = self.into_cow();
         loop {
             match preconds.last() {
                 Some(&Cond::Char(p)) => {
@@ -288,7 +287,7 @@ impl<'a> IntoTransform<'a> for StrTo<'a> {
 }
 
 pub fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], mut from: From,
-                               postconds: &[Cond], to: Transform) -> CowString<'a> {
+                               postconds: &[Cond], to: Transform) -> Cow<'a, str> {
     fn transform(to: &Transform, s: &str, buf: &mut String) {
         match *to {
             Transform::Char(t) => buf.push(t),
@@ -359,12 +358,12 @@ macro_rules! subst_rules {
 
     // has to be come later
     ($e:expr => $($t:tt)*) => ({
-        use std::string::CowString;
+        use std::borrow::Cow;
         use $crate::{Search, Transform, IntoTransform, Cond, IntoCond};
 
         #[inline(always)]
         fn subst<'a, From: Search>(s: &'a str, preconds: &[Cond], from: From, postconds: &[Cond],
-                                   to: Transform, rulestring: &str) -> CowString<'a> {
+                                   to: Transform, rulestring: &str) -> Cow<'a, str> {
             let ret = $crate::subst(s, preconds, from, postconds, to);
             if s != ret { debug!("{} --> {} ({})", s, ret, rulestring); }
             ret
@@ -430,8 +429,9 @@ fn test_subst() {
                      "ph".into_transform()),
                "pufphphphphphf");
 
-    assert!(subst("hello", &[], "l", &[], "(ell)".into_transform()).is_owned());
-    assert!(subst("bovine", &[], "l", &[], "(ell)".into_transform()).is_borrowed());
+    let is_borrowed = |v| match v { Cow::Borrowed(_) => true, Cow::Owned(_) => false };
+    assert!(!is_borrowed(subst("hello", &[], "l", &[], "(ell)".into_transform())));
+    assert!(is_borrowed(subst("bovine", &[], "l", &[], "(ell)".into_transform())));
 
     assert_eq!(subst("syzygy", &[], "", &[], "/".into_transform()),
                "/s/y/z/y/g/y/");
