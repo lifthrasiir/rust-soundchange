@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `soundchange` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, soundchange">
+
+    <title>soundchange - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'></p>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>soundchange</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-0' href='../src/soundchange/lib.rs.html#1-442'>[src]</a></span></h1>
+<div class='docblock'><p>A tool for implementing sound change algorithms.</p>
+
+<p>This is strictly modeled after Mark Rosenfelder&#39;s <a href="http://zompist.com/scahelp.html">Sound Change Applier</a>,
+with a necessary tweak for Rust&#39;s macro system.</p>
+
+<p>Typical usage and the comparison with the original SCA rules:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>soundchange</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>log</span>;
+
+<span class='kw'>use</span> <span class='ident'>soundchange</span>::{<span class='ident'>CharOf</span>, <span class='ident'>StrTo</span>};
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// custom conditions</span>
+    <span class='kw'>let</span> <span class='ident'>is_boundary</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>c</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_none</span>();
+    <span class='kw'>let</span> <span class='ident'>is_vowel</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>c</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>map_or</span>(<span class='boolval'>false</span>, <span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='string'>&quot;aeiou&quot;</span>.<span class='ident'>contains</span>(<span class='ident'>c</span>));
+    <span class='kw'>let</span> <span class='ident'>boundary</span> <span class='op'>=</span> <span class='ident'>CharOf</span>(<span class='kw-2'>&amp;</span><span class='ident'>is_boundary</span>);
+    <span class='kw'>let</span> <span class='ident'>vowel</span> <span class='op'>=</span> <span class='ident'>CharOf</span>(<span class='kw-2'>&amp;</span><span class='ident'>is_vowel</span>);
+
+    <span class='comment'>// custom transformers</span>
+    <span class='kw'>let</span> <span class='ident'>make_reverse</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>out</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>String</span><span class='op'>|</span> <span class='ident'>out</span>.<span class='ident'>extend</span>(<span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>rev</span>());
+    <span class='kw'>let</span> <span class='ident'>reverse</span> <span class='op'>=</span> <span class='ident'>StrTo</span>(<span class='kw-2'>&amp;</span><span class='ident'>make_reverse</span>);
+
+    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;fihs&quot;</span>.<span class='ident'>to_string</span>();
+    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='macro'>subst_rules</span><span class='macro'>!</span> { <span class='ident'>s</span> <span class='op'>=&gt;</span>                 <span class='comment'>// V=aeiou</span>
+        <span class='string'>&quot;f&quot;</span> [<span class='ident'>boundary</span>] <span class='op'>=&gt;</span> <span class='string'>&quot;gh&quot;</span>;                 <span class='comment'>// f/gh/_#</span>
+        <span class='string'>&quot;f&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;ph&quot;</span>;                            <span class='comment'>// f/ph/_</span>
+        [<span class='string'>&quot;w&quot;</span>] <span class='ident'>vowel</span> [<span class='string'>&quot;m&quot;</span> <span class='ident'>vowel</span> <span class='string'>&quot;n&quot;</span>] <span class='op'>=&gt;</span> <span class='string'>&quot;o&quot;</span>;     <span class='comment'>// V/o/w_mVn</span>
+        <span class='string'>&quot;sh&quot;</span> [<span class='string'>&quot;o&quot;</span>] <span class='op'>=&gt;</span> <span class='string'>&quot;ti&quot;</span>;                     <span class='comment'>// sh/ti/_o</span>
+        [<span class='ident'>vowel</span>] <span class='string'>&quot;hs&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>reverse</span>;                <span class='comment'>// sh/\\/V_</span>
+        <span class='string'>&quot;&quot;</span> [<span class='ident'>boundary</span>] <span class='op'>=&gt;</span> <span class='string'>&quot;ing&quot;</span>;                 <span class='comment'>// /ing/_#</span>
+    };
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>, <span class='string'>&quot;phishing&quot;</span>);
+}
+</pre>
+
+<p>Note: You can use <code>RUST_LOG=4</code> for tracking any change on the string
+and rules that trigger that change. Also, a large number of rules may trigger
+a recursion limit on rustc; you have to split them in that case.</p>
+
+<p>Any expression in the left side is considered a &quot;condition&quot; for searching,
+and can be either <code>char</code>, <code>&amp;str</code> or a function from <code>Option&lt;char&gt;</code> to <code>bool</code>.
+The function argument is an <code>Option</code> since it can look at the string boundary.
+<code>[]</code> indicates a context, and is not considered when the string gets transformed.
+(The behavior of conditions can be also customized by implementing <code>IntoCond</code> trait
+and/or <code>Search</code> trait. <code>&amp;str</code> and the function implements both.)</p>
+
+<p>Any expression in the right side is considered a &quot;transformer&quot;,
+and can be either <code>char</code>, <code>&amp;str</code> or a function from <code>char</code> to <code>char</code>.
+When multiple characters have been matched, a function will be invoked for each character.
+(The behavior of transformers can be also customized by implementing <code>Transform</code> trait.)</p>
+
+<p>The actual processing is driven through the <code>subst</code> function,
+which is for convenience wrapped into the <code>subst_rules!</code> macro.
+The syntax should be self-explanatory, except that it returns a <code>Cow</code> string.</p>
+</div><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='macro' href='macro.subst_rules!.html'
+                               title='soundchange::subst_rules!'>subst_rules!</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.CharOf.html'
+                               title='soundchange::CharOf'>CharOf</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.CharTo.html'
+                               title='soundchange::CharTo'>CharTo</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.StrOf.html'
+                               title='soundchange::StrOf'>StrOf</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.StrTo.html'
+                               title='soundchange::StrTo'>StrTo</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.Cond.html'
+                               title='soundchange::Cond'>Cond</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.Transform.html'
+                               title='soundchange::Transform'>Transform</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.IntoCond.html'
+                               title='soundchange::IntoCond'>IntoCond</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.IntoTransform.html'
+                               title='soundchange::IntoTransform'>IntoTransform</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.Search.html'
+                               title='soundchange::Search'>Search</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.check_postfix.html'
+                               title='soundchange::check_postfix'>check_postfix</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.check_prefix.html'
+                               title='soundchange::check_prefix'>check_prefix</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.subst.html'
+                               title='soundchange::subst'>subst</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "soundchange";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>

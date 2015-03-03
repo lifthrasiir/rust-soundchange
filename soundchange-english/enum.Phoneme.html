@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Phoneme` enum in crate `soundchange-english`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Phoneme">
+
+    <title>soundchange-english::Phoneme - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='index.html'>soundchange-english</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Word.html' title='A sequence of phonemes.'>Word</a><a class='struct ' href='struct.WordPhonemes.html' title='An iterator for every phoneme inside given word.'>WordPhonemes</a></div><div class='block enum'><h2>Enums</h2><a class='enum current' href='enum.Phoneme.html' title='A phoneme for English.'>Phoneme</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>soundchange-english</a>::<wbr><a class='enum' href=''>Phoneme</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-13' href='../src/soundchange-english/lib.rs.html#37-90'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Phoneme {
+    P,
+    B,
+    T,
+    D,
+    G,
+    K,
+    M,
+    N,
+    NG,
+    F,
+    V,
+    TH,
+    S,
+    Z,
+    SH,
+    CH,
+    J,
+    R,
+    L,
+    H,
+    Y,
+    W,
+    _C,
+    _Q,
+    _X,
+    AY,
+    A,
+    EE,
+    E,
+    AI,
+    I,
+    OH,
+    O,
+    EW,
+    U,
+    OO,
+    AW,
+    UU,
+    UH,
+    _A,
+    _E,
+    _I,
+    _O,
+}</pre><div class='docblock'><p>A phoneme for English.</p>
+
+<p>While variants are named after their common respelling
+(slightly adjusted to fit in the ASCII and to be unique)
+they do not directly represent an unique sound (say, voiceless bilabial stop /p/).
+A phoneme rather represents an (conceptual) equivalence class for related sounds,
+so that it is a minimal unit that can give the difference in meaning.
+Different dialects of English commonly have different sounds for the same phoneme.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.P'><a class='stability Unmarked' title='No stability level'></a><code>P</code></td><td></td></tr><tr><td id='variant.B'><a class='stability Unmarked' title='No stability level'></a><code>B</code></td><td></td></tr><tr><td id='variant.T'><a class='stability Unmarked' title='No stability level'></a><code>T</code></td><td></td></tr><tr><td id='variant.D'><a class='stability Unmarked' title='No stability level'></a><code>D</code></td><td></td></tr><tr><td id='variant.G'><a class='stability Unmarked' title='No stability level'></a><code>G</code></td><td></td></tr><tr><td id='variant.K'><a class='stability Unmarked' title='No stability level'></a><code>K</code></td><td></td></tr><tr><td id='variant.M'><a class='stability Unmarked' title='No stability level'></a><code>M</code></td><td></td></tr><tr><td id='variant.N'><a class='stability Unmarked' title='No stability level'></a><code>N</code></td><td></td></tr><tr><td id='variant.NG'><a class='stability Unmarked' title='No stability level'></a><code>NG</code></td><td></td></tr><tr><td id='variant.F'><a class='stability Unmarked' title='No stability level'></a><code>F</code></td><td></td></tr><tr><td id='variant.V'><a class='stability Unmarked' title='No stability level'></a><code>V</code></td><td></td></tr><tr><td id='variant.TH'><a class='stability Unmarked' title='No stability level'></a><code>TH</code></td><td></td></tr><tr><td id='variant.S'><a class='stability Unmarked' title='No stability level'></a><code>S</code></td><td></td></tr><tr><td id='variant.Z'><a class='stability Unmarked' title='No stability level'></a><code>Z</code></td><td></td></tr><tr><td id='variant.SH'><a class='stability Unmarked' title='No stability level'></a><code>SH</code></td><td></td></tr><tr><td id='variant.CH'><a class='stability Unmarked' title='No stability level'></a><code>CH</code></td><td></td></tr><tr><td id='variant.J'><a class='stability Unmarked' title='No stability level'></a><code>J</code></td><td></td></tr><tr><td id='variant.R'><a class='stability Unmarked' title='No stability level'></a><code>R</code></td><td></td></tr><tr><td id='variant.L'><a class='stability Unmarked' title='No stability level'></a><code>L</code></td><td></td></tr><tr><td id='variant.H'><a class='stability Unmarked' title='No stability level'></a><code>H</code></td><td></td></tr><tr><td id='variant.Y'><a class='stability Unmarked' title='No stability level'></a><code>Y</code></td><td></td></tr><tr><td id='variant.W'><a class='stability Unmarked' title='No stability level'></a><code>W</code></td><td></td></tr><tr><td id='variant._C'><a class='stability Unmarked' title='No stability level'></a><code>_C</code></td><td></td></tr><tr><td id='variant._Q'><a class='stability Unmarked' title='No stability level'></a><code>_Q</code></td><td></td></tr><tr><td id='variant._X'><a class='stability Unmarked' title='No stability level'></a><code>_X</code></td><td></td></tr><tr><td id='variant.AY'><a class='stability Unmarked' title='No stability level'></a><code>AY</code></td><td></td></tr><tr><td id='variant.A'><a class='stability Unmarked' title='No stability level'></a><code>A</code></td><td></td></tr><tr><td id='variant.EE'><a class='stability Unmarked' title='No stability level'></a><code>EE</code></td><td></td></tr><tr><td id='variant.E'><a class='stability Unmarked' title='No stability level'></a><code>E</code></td><td></td></tr><tr><td id='variant.AI'><a class='stability Unmarked' title='No stability level'></a><code>AI</code></td><td></td></tr><tr><td id='variant.I'><a class='stability Unmarked' title='No stability level'></a><code>I</code></td><td></td></tr><tr><td id='variant.OH'><a class='stability Unmarked' title='No stability level'></a><code>OH</code></td><td></td></tr><tr><td id='variant.O'><a class='stability Unmarked' title='No stability level'></a><code>O</code></td><td></td></tr><tr><td id='variant.EW'><a class='stability Unmarked' title='No stability level'></a><code>EW</code></td><td></td></tr><tr><td id='variant.U'><a class='stability Unmarked' title='No stability level'></a><code>U</code></td><td></td></tr><tr><td id='variant.OO'><a class='stability Unmarked' title='No stability level'></a><code>OO</code></td><td></td></tr><tr><td id='variant.AW'><a class='stability Unmarked' title='No stability level'></a><code>AW</code></td><td></td></tr><tr><td id='variant.UU'><a class='stability Unmarked' title='No stability level'></a><code>UU</code></td><td></td></tr><tr><td id='variant.UH'><a class='stability Unmarked' title='No stability level'></a><code>UH</code></td><td></td></tr><tr><td id='variant._A'><a class='stability Unmarked' title='No stability level'></a><code>_A</code></td><td></td></tr><tr><td id='variant._E'><a class='stability Unmarked' title='No stability level'></a><code>_E</code></td><td></td></tr><tr><td id='variant._I'><a class='stability Unmarked' title='No stability level'></a><code>_I</code></td><td></td></tr><tr><td id='variant._O'><a class='stability Unmarked' title='No stability level'></a><code>_O</code></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'><h4 id='method.to_char' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.to_char' class='fnname'>to_char</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a></code></h4>
+<h4 id='method.from_char' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.from_char' class='fnname'>from_char</a>(c: <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a>&gt;</code></h4>
+<h4 id='method.is_vowel' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_vowel' class='fnname'>is_vowel</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_consonant' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_consonant' class='fnname'>is_consonant</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_untranslated' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_untranslated' class='fnname'>is_untranslated</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_short_vowel' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_short_vowel' class='fnname'>is_short_vowel</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_long_vowel' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_long_vowel' class='fnname'>is_long_vowel</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.to_short_vowel' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.to_short_vowel' class='fnname'>to_short_vowel</a>(&amp;self) -&gt; <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h4>
+<h4 id='method.to_long_vowel' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.to_long_vowel' class='fnname'>to_long_vowel</a>(&amp;self) -&gt; <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'></div><h3 class='impl'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/num/trait.FromPrimitive.html' title='core::num::FromPrimitive'>FromPrimitive</a> for <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'><h4 id='method.from_i64' class='method'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#method.from_i64' class='fnname'>from_i64</a>(__arg_0: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a>&gt;</code></h4>
+<h4 id='method.from_u64' class='method'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#method.from_u64' class='fnname'>from_u64</a>(__arg_0: <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a>&gt;</code></h4>
+<h4 id='method.from_int' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_int' class='fnname'>from_int</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_i8' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_i8' class='fnname'>from_i8</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_i16' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_i16' class='fnname'>from_i16</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.i16.html'>i16</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_i32' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_i32' class='fnname'>from_i32</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_uint' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_uint' class='fnname'>from_uint</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_u8' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_u8' class='fnname'>from_u8</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_u16' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_u16' class='fnname'>from_u16</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_u32' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_u32' class='fnname'>from_u32</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_f32' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_f32' class='fnname'>from_f32</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_f64' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_f64' class='fnname'>from_f64</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'><h4 id='method.assert_receiver_is_total_eq' class='tymethod'><a class='stability Stable' title='Stable'></a><code>fn <a href='#tymethod.assert_receiver_is_total_eq' class='fnname'>assert_receiver_is_total_eq</a>(&amp;self)</code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../soundchange-english/enum.Phoneme.html' title='soundchange-english::Phoneme'>Phoneme</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "soundchange-english";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>
