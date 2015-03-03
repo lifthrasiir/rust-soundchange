@@ -17,7 +17,7 @@ use soundchange::{CharOf, StrTo};
 fn main() {
     // custom conditions
     let is_boundary = |c: Option<char>| c.is_none();
-    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
+    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains(c));
     let boundary = CharOf(&is_boundary);
     let vowel = CharOf(&is_vowel);
 
@@ -210,7 +210,7 @@ impl<'a> Search for &'a str {
         let mut lastmatch = 0;
         let mut start = 0;
         loop {
-            let pos = match s[start..].find_str(&search) {
+            let pos = match s[start..].find(&search) {
                 Some(i) => i + start,
                 None => break,
             };
@@ -386,9 +386,9 @@ fn test_subst() {
     assert_eq!(subst("hello", &[], "l", &["o".into_post_cond()], "(ell)".into_transform()),
                "hel(ell)o");
 
-    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains_char(c));
-    let is_nasal = |c: Option<char>| c.map_or(false, |c| "nm".contains_char(c));
-    let is_clike = |c: Option<char>| c.map_or(false, |c| "ckx".contains_char(c));
+    let is_vowel = |c: Option<char>| c.map_or(false, |c| "aeiou".contains(c));
+    let is_nasal = |c: Option<char>| c.map_or(false, |c| "nm".contains(c));
+    let is_clike = |c: Option<char>| c.map_or(false, |c| "ckx".contains(c));
     let is_not_vowel = |c: Option<char>| !is_vowel(c);
     let is_boundary = |c: Option<char>| c.is_none();
 
